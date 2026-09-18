@@ -1,0 +1,117 @@
+name: .NET Build & Test
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  build:
+    name: build & test (${{ matrix.project }})
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        project:
+          - Beans.Patchable
+
+    steps:
+      - name: 📩 checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔎 check for changes
+        id: changes
+        shell: bash
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "On main - running all projects."
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base="${{ github.event.pull_request.base.sha }}"
+          else
+            base="${{ github.event.before }}"
+          fi
+
+          if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$base" 2>/dev/null; then
+            echo "No usable diff base (new branch or force-push) - treating as changed."
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if git diff --quiet "$base" -- "src/${{ matrix.project }}/" "src/global.json"; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: ⚙️ setup .NET
+        if: steps.changes.outputs.changed == 'true'
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          cache: true
+          cache-dependency-path: src/${{ matrix.project }}/**/*.csproj
+
+      - name: 📦 restore
+        if: steps.changes.outputs.changed == 'true'
+        run: dotnet restore src/${{ matrix.project }}/${{ matrix.project }}.sln
+
+      - name: 🔨 build
+        if: steps.changes.outputs.changed == 'true'
+        run: dotnet build src/${{ matrix.project }}/${{ matrix.project }}.sln --no-restore --configuration Release
+
+      - name: 🧪 test
+        if: steps.changes.outputs.changed == 'true'
+        working-directory: src/${{ matrix.project }}
+        shell: bash
+        run: |
+          args=(--no-build --configuration Release)
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            args+=(--coverage --coverage-output-format cobertura)
+          fi
+          dotnet test "${args[@]}"
+
+      - name: 📊 build coverage summary
+        if: steps.changes.outputs.changed == 'true' && github.event_name == 'pull_request'
+        run: |
+          dotnet tool install --global dotnet-reportgenerator-globaltool --version 5.5.11
+          reportgenerator \
+            -reports:"src/${{ matrix.project }}/**/TestResults/*.cobertura.xml" \
+            -targetdir:"coverage-report" \
+            -reporttypes:"MarkdownSummaryGithub"
+
+      - name: 💬 post coverage comment
+        if: steps.changes.outputs.changed == 'true' && github.event_name == 'pull_request'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          marker="<!-- coverage-comment: ${{ matrix.project }} -->"
+          body_file=$(mktemp)
+          {
+            echo "$marker"
+            echo "### Coverage — ${{ matrix.project }}"
+            echo
+            cat coverage-report/SummaryGithub.md
+          } > "$body_file"
+
+          pr_number="${{ github.event.pull_request.number }}"
+          existing_id=$(gh api "repos/${{ github.repository }}/issues/$pr_number/comments" --paginate \
+            --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -n1)
+
+          payload=$(jq -n --rawfile body "$body_file" '{body: $body}')
+
+          if [ -n "$existing_id" ]; then
+            echo "$payload" | gh api -X PATCH "repos/${{ github.repository }}/issues/comments/$existing_id" --input -
+          else
+            echo "$payload" | gh api -X POST "repos/${{ github.repository }}/issues/$pr_number/comments" --input -
+          fi
