@@ -29,6 +29,12 @@ jobs:
         id: changes
         shell: bash
         run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "On main - running all projects."
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             base="${{ github.event.pull_request.base.sha }}"
           else
@@ -85,6 +91,7 @@ jobs:
 
       - name: 💬 post coverage comment
         if: steps.changes.outputs.changed == 'true' && github.event_name == 'pull_request'
+        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -101,8 +108,10 @@ jobs:
           existing_id=$(gh api "repos/${{ github.repository }}/issues/$pr_number/comments" --paginate \
             --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -n1)
 
+          payload=$(jq -n --rawfile body "$body_file" '{body: $body}')
+
           if [ -n "$existing_id" ]; then
-            gh api -X PATCH "repos/${{ github.repository }}/issues/comments/$existing_id" -f body=@"$body_file"
+            echo "$payload" | gh api -X PATCH "repos/${{ github.repository }}/issues/comments/$existing_id" --input -
           else
-            gh api -X POST "repos/${{ github.repository }}/issues/$pr_number/comments" -f body=@"$body_file"
+            echo "$payload" | gh api -X POST "repos/${{ github.repository }}/issues/$pr_number/comments" --input -
           fi
