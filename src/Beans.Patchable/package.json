@@ -1,0 +1,6 @@
+{
+  "name": "Beans.Patchable",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Version/changelog tracking shim for the Beans.Patchable NuGet package - see the .csproj for the real project."
+}

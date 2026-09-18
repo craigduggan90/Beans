@@ -115,3 +115,61 @@ jobs:
           else
             echo "$payload" | gh api -X POST "repos/${{ github.repository }}/issues/$pr_number/comments" --input -
           fi
+
+  version:
+    name: update changesets & changelogs
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: 📩 checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ⚙️ setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 📦 install dependencies
+        run: npm ci
+
+      - name: 📝 generate changesets from commits
+        shell: bash
+        run: |
+          before="${{ github.event.before }}"
+          if [ -z "$before" ] || [ "$before" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$before" 2>/dev/null; then
+            echo "No usable commit range - skipping changeset generation."
+            exit 0
+          fi
+          node scripts/create-changesets-from-commits.mjs "$before" "${{ github.sha }}"
+
+      - name: 🔖 bump versions & changelogs
+        id: version
+        shell: bash
+        run: |
+          if ! ls .changeset/*.md >/dev/null 2>&1; then
+            echo "No pending changesets - nothing to do."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          npx changeset version
+          node scripts/sync-csproj-version.mjs
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: 💾 commit & push
+        if: steps.version.outputs.changed == 'true'
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "ci: update changesets and changelogs"
+          git push origin HEAD:main
