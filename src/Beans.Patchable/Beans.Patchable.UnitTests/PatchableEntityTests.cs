@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Beans.Patchable.UnitTests;
 
 public static class PatchableEntityTests
@@ -254,6 +256,9 @@ public static class PatchableEntityTests
 
         public int? Score { get; set; }
 
+        // Must stay an instance property: GetProperty filters on BindingFlags.Instance, so making this
+        // static would make the test pass for the wrong reason (excluded as static, not as read-only).
+        [SuppressMessage("Performance", "CA1822:Mark members as static")]
         public string ReadOnly => "Read only";
     }
 }
