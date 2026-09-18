@@ -1,0 +1,20 @@
+{
+  "name": "beans",
+  "version": "1.0.0",
+  "description": "Stuff I keep rewriting across projects, canned once and for all.",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:craigduggan90/beans.git"
+  },
+  "license": "MIT",
+  "author": "Craig Duggan",
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.2",
+    "@commitlint/config-conventional": "^21.2.2",
+    "commitlint": "^21.2.2",
+    "husky": "^9.1.7"
+  },
+  "scripts": {
+    "prepare": "husky"
+  }
+}
