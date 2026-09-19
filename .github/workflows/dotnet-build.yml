@@ -66,6 +66,10 @@ jobs:
         if: steps.changes.outputs.changed == 'true'
         run: dotnet restore src/${{ matrix.project }}/${{ matrix.project }}.sln
 
+      - name: 🧹 verify formatting
+        if: steps.changes.outputs.changed == 'true'
+        run: dotnet format src/${{ matrix.project }}/${{ matrix.project }}.sln --verify-no-changes --no-restore
+
       - name: 🔨 build
         if: steps.changes.outputs.changed == 'true'
         run: dotnet build src/${{ matrix.project }}/${{ matrix.project }}.sln --no-restore --configuration Release
