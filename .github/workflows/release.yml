@@ -34,7 +34,7 @@ jobs:
       # a PAT is needed so the release PRs trigger the required status checks.
       - name: 🔖 release please
         id: release
-        uses: googleapis/release-please-action@v4
+        uses: googleapis/release-please-action@v5
         with:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
 
@@ -57,12 +57,12 @@ jobs:
 
     steps:
       - name: 📩 checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ env.TAG }}
 
       - name: ⚙️ setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
