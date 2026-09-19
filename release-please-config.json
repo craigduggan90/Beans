@@ -16,6 +16,17 @@
           "xpath": "//Project/PropertyGroup/Version"
         }
       ]
+    },
+    "src/Beans.Common": {
+      "component": "Beans.Common",
+      "pull-request-title-pattern": "chore(release): release common ${version}",
+      "extra-files": [
+        {
+          "type": "xml",
+          "path": "Beans.Common/Beans.Common.csproj",
+          "xpath": "//Project/PropertyGroup/Version"
+        }
+      ]
     }
   }
 }
