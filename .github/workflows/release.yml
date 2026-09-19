@@ -17,7 +17,6 @@ jobs:
   release-please:
     name: release please
     runs-on: ubuntu-latest
-    timeout-minutes: 20
 
     permissions:
       contents: write
@@ -31,27 +30,13 @@ jobs:
 
     steps:
       # on a merged release PR this tags + creates the GitHub releases,
-      # otherwise it opens/updates the release PR (versions + changelogs).
-      # a PAT is needed so the release PR triggers the required status checks,
-      # and so the resulting merge to main triggers this workflow again.
+      # otherwise it opens/updates one release PR per project (version + changelog), for a human to merge.
+      # a PAT is needed so the release PRs trigger the required status checks.
       - name: 🔖 release please
         id: release
         uses: googleapis/release-please-action@v4
         with:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
-
-      # the main ruleset needs a code owner review, which the PAT owner can't give on their own PR,
-      # so wait for the required checks and merge using the owner's ruleset bypass instead of auto-merge
-      - name: 🤖 merge release pr
-        if: steps.release.outputs.prs_created == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
-        run: |
-          pr="${{ fromJson(steps.release.outputs.pr).number }}"
-          # checks take a moment to register after the PR is opened or updated
-          sleep 30
-          gh pr checks "$pr" --repo "${{ github.repository }}" --required --watch --interval 15
-          gh pr merge "$pr" --repo "${{ github.repository }}" --merge --admin
 
   publish:
     name: publish (${{ matrix.path }})
