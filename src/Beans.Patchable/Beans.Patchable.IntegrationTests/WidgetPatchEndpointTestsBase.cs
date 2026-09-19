@@ -1,9 +1,9 @@
-using System.Net;
-using System.Text;
 using Beans.Patchable.IntegrationTests.TestSupport;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using System.Net;
+using System.Text;
 
 namespace Beans.Patchable.IntegrationTests;
 
