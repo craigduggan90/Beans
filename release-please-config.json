@@ -3,6 +3,8 @@
   "release-type": "simple",
   "include-component-in-tag": true,
   "separate-pull-requests": true,
+  "pull-request-header": "Release PR",
+  "pull-request-footer": " ",
   "packages": {
     "src/Beans.Patchable": {
       "component": "Beans.Patchable",
