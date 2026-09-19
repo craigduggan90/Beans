@@ -1,5 +1,8 @@
 namespace Beans.Patchable;
 
+/// <summary>
+/// An entity that can be patched using <see cref="Optional{T}"/> values, and that tracks whether it has been changed.
+/// </summary>
 public interface IPatchableEntity
 {
     /// <summary>Indicates whether this object has been marked as changed.</summary>
