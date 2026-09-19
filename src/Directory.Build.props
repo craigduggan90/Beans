@@ -1,0 +1,10 @@
+<Project>
+
+  <PropertyGroup>
+    <Authors>Craig Duggan (craigduggan90)</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/craigduggan90/Beans</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+</Project>

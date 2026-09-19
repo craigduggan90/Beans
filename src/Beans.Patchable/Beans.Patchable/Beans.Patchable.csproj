@@ -5,6 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Description>Stuff I keep rewriting for lightweight patching.</Description>
+    <PackageProjectUrl>https://github.com/craigduggan90/Beans/tree/main/src/Beans.Patchable</PackageProjectUrl>
   </PropertyGroup>
   
   <ItemGroup>
