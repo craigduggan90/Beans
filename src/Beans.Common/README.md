@@ -99,10 +99,10 @@ process-wide state.
 ## Test Strategy
 
 - **`Beans.Common.UnitTests`** covers each provider with and without a context, including that a context only applies 
-  within its `using` scope, and runs `EnvironmentVariableAccessor` against real environment variables.
+  within its `using` scope, runs `EnvironmentVariableAccessor` against real environment variables, and checks what 
+  `AddCommonServices` registers.
 
-`AddCommonServices` and the context classes are excluded from code coverage.  The contexts are exercised through the 
-providers that use them.
+The context classes are excluded from code coverage.  They're exercised through the providers that use them.
 
 ```bash
 dotnet test
