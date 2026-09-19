@@ -1,0 +1,100 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+# one release run at a time, and never cancel one part-way through
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  release-please:
+    name: release please
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    outputs:
+      releases_created: ${{ steps.release.outputs.releases_created }}
+      paths_released: ${{ steps.release.outputs.paths_released }}
+      # per-project outputs are keyed by path (e.g. src/Beans.Patchable--tag_name), so pass them all through
+      all: ${{ toJSON(steps.release.outputs) }}
+
+    steps:
+      # on a merged release PR this tags + creates the GitHub releases,
+      # otherwise it opens/updates the release PR (versions + changelogs).
+      # a PAT is needed so the release PR triggers the required status checks,
+      # and so the resulting merge to main triggers this workflow again.
+      - name: 🔖 release please
+        id: release
+        uses: googleapis/release-please-action@v4
+        with:
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+
+      # the main ruleset needs a code owner review, which the PAT owner can't give on their own PR,
+      # so wait for the required checks and merge using the owner's ruleset bypass instead of auto-merge
+      - name: 🤖 merge release pr
+        if: steps.release.outputs.prs_created == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+        run: |
+          pr="${{ fromJson(steps.release.outputs.pr).number }}"
+          # checks take a moment to register after the PR is opened or updated
+          sleep 30
+          gh pr checks "$pr" --repo "${{ github.repository }}" --required --watch --interval 15
+          gh pr merge "$pr" --repo "${{ github.repository }}" --merge --admin
+
+  publish:
+    name: publish (${{ matrix.path }})
+    needs: release-please
+    if: needs.release-please.outputs.releases_created == 'true'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        path: ${{ fromJson(needs.release-please.outputs.paths_released) }}
+
+    env:
+      TAG: ${{ fromJson(needs.release-please.outputs.all)[format('{0}--tag_name', matrix.path)] }}
+
+    steps:
+      - name: 📩 checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      - name: ⚙️ setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # the version comes from the csproj that release-please just bumped
+      - name: 📦 pack
+        run: |
+          project=$(basename "${{ matrix.path }}")
+          dotnet pack "${{ matrix.path }}/$project.sln" --configuration Release --output artifacts
+
+      - name: 📎 attach to github release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$TAG" artifacts/*.nupkg --clobber
+
+      # flip the NUGET_PUBLISH_ENABLED repo variable to 'true' (and add NUGET_API_KEY) to start publishing
+      - name: 🚀 push to nuget
+        if: vars.NUGET_PUBLISH_ENABLED == 'true'
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: dotnet nuget push "artifacts/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
