@@ -4,7 +4,10 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Version>0.0.0</Version>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Description>Stuff I keep rewriting for lightweight patching.</Description>
+    <PackageProjectUrl>https://github.com/craigduggan90/Beans/tree/main/src/Beans.Patchable</PackageProjectUrl>
   </PropertyGroup>
   
   <ItemGroup>
