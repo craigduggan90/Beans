@@ -25,6 +25,6 @@ public static class CursorGenerator
     /// A cursor greater than any previously returned by this class: the timestamp as microseconds since the Unix epoch,
     /// or one more than the last cursor if that is not greater.
     /// </returns>
-    public static long Next(DateTimeOffset timestamp) => 
+    public static long Next(DateTimeOffset timestamp) =>
         Sequence.Next((long)(timestamp - DateTimeOffset.UnixEpoch).TotalMicroseconds);
 }

@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Beans.Pageable", "Beans.Pag
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Beans.Pageable.UnitTests", "Beans.Pageable.UnitTests\Beans.Pageable.UnitTests.csproj", "{31962BD4-ED71-4619-B15B-ADDA74D88B1B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Beans.Pageable.IntegrationTests", "Beans.Pageable.IntegrationTests\Beans.Pageable.IntegrationTests.csproj", "{CFB57773-4DF6-40F5-8A8F-DDF62715ACA5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,18 @@ Global
 		{31962BD4-ED71-4619-B15B-ADDA74D88B1B}.Release|x64.Build.0 = Release|Any CPU
 		{31962BD4-ED71-4619-B15B-ADDA74D88B1B}.Release|x86.ActiveCfg = Release|Any CPU
 		{31962BD4-ED71-4619-B15B-ADDA74D88B1B}.Release|x86.Build.0 = Release|Any CPU
+		{CFB57773-4DF6-40F5-8A8F-DDF62715ACA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFB57773-4DF6-40F5-8A8F-DDF62715ACA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFB57773-4DF6-40F5-8A8F-DDF62715ACA5}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CFB57773-4DF6-40F5-8A8F-DDF62715ACA5}.Debug|x64.Build.0 = Debug|Any CPU
+		{CFB57773-4DF6-40F5-8A8F-DDF62715ACA5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CFB57773-4DF6-40F5-8A8F-DDF62715ACA5}.Debug|x86.Build.0 = Debug|Any CPU
+		{CFB57773-4DF6-40F5-8A8F-DDF62715ACA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFB57773-4DF6-40F5-8A8F-DDF62715ACA5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFB57773-4DF6-40F5-8A8F-DDF62715ACA5}.Release|x64.ActiveCfg = Release|Any CPU
+		{CFB57773-4DF6-40F5-8A8F-DDF62715ACA5}.Release|x64.Build.0 = Release|Any CPU
+		{CFB57773-4DF6-40F5-8A8F-DDF62715ACA5}.Release|x86.ActiveCfg = Release|Any CPU
+		{CFB57773-4DF6-40F5-8A8F-DDF62715ACA5}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
