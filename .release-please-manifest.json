@@ -1,4 +1,5 @@
 {
   "src/Beans.Patchable": "1.0.0",
-  "src/Beans.Common": "1.0.0"
+  "src/Beans.Common": "1.0.0",
+  "src/Beans.Requestable": "0.0.0"
 }
