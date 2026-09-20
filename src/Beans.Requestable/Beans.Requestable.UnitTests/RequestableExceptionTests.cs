@@ -2,14 +2,14 @@ using Beans.Requestable.UnitTests.TestSupport;
 
 namespace Beans.Requestable.UnitTests;
 
-public static class RequestHandlerExceptionTests
+public static class RequestableExceptionTests
 {
     public class Constructor
     {
         [Fact]
         public void ShouldInitialiseObject_WithMessage()
         {
-            var actual = new RequestHandlerException("expected message");
+            var actual = new RequestableException("expected message");
 
             Assert.Equal("expected message", actual.Message);
             Assert.Null(actual.InnerException);
@@ -20,7 +20,7 @@ public static class RequestHandlerExceptionTests
         {
             var innerException = new InvalidOperationException("this is an invalid operation.");
 
-            var actual = new RequestHandlerException("expected message", innerException);
+            var actual = new RequestableException("expected message", innerException);
 
             Assert.Equal("expected message", actual.Message);
             Assert.Same(innerException, actual.InnerException);
@@ -32,7 +32,7 @@ public static class RequestHandlerExceptionTests
         [Fact]
         public void ShouldCreateExceptionWithExpectedMessage()
         {
-            var actual = RequestHandlerException.ForRequest(typeof(EchoRequest));
+            var actual = RequestableException.ForRequest(typeof(EchoRequest));
 
             Assert.Equal("Unable to resolve handler for 'EchoRequest' request.", actual.Message);
         }
@@ -43,7 +43,7 @@ public static class RequestHandlerExceptionTests
         [Fact]
         public void ShouldCreateExceptionWithExpectedMessage()
         {
-            var actual = RequestHandlerException.ForFailedInstantiation(typeof(EchoRequest));
+            var actual = RequestableException.ForFailedInstantiation(typeof(EchoRequest));
 
             Assert.Equal("Unable to instantiate handler for 'EchoRequest' request.", actual.Message);
         }

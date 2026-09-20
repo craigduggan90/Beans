@@ -22,3 +22,9 @@ internal sealed record UnhandledRequest : IRequest<string>;
 internal sealed record UnhandledVoidRequest : IRequest;
 
 internal sealed record ThrowingRequest : IRequest<string>;
+
+// Duplicate handlers are generic so the assembly scan skips them, otherwise every test that scans this assembly would
+// fail.  Tests hand closed versions (e.g. FirstDuplicateHandler<int>) to the registration directly.
+internal sealed record DuplicateRequest<T> : IRequest<string>;
+
+internal sealed record DuplicateVoidRequest<T> : IRequest;

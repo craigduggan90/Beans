@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Beans.Requestable.IntegrationTests.TestSupport;
@@ -10,14 +11,13 @@ internal static class TestHostFactory
 {
     public static async Task<WebApplication> CreateHostAsync()
     {
-        var builder = WebApplication.CreateBuilder();
+        var builder = WebApplication.CreateBuilder(new WebApplicationOptions { EnvironmentName = Environments.Production });
         builder.WebHost.UseTestServer();
         builder.Logging.ClearProviders();
 
         builder.Services.AddSingleton<MessageLog>();
         builder.Services.AddScoped<RequestScope>();
 
-        // No configuration: the handlers are found in the calling assembly, which is this one.
         builder.Services.AddRequestableServices();
 
         builder.Services

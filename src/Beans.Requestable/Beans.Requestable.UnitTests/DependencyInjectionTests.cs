@@ -53,12 +53,9 @@ public static class DependencyInjectionTests
 
             Assert.Equal("hello", actual);
         }
-    }
 
-    public class AddRequestableServicesWithConfiguration
-    {
         [Fact]
-        public void ShouldReturnTheSameServiceCollection()
+        public void ShouldReturnTheSameServiceCollection_WhenConfigurationIsProvided()
         {
             var services = new ServiceCollection();
 
@@ -188,6 +185,44 @@ public static class DependencyInjectionTests
             Assert.Throws<ArgumentNullException>(() => services.AddRequestableServices(null!));
         }
 
+        [Fact]
+        public void ShouldThrowRequestableException_WhenAssembliesContainDuplicateHandlers()
+        {
+            var services = new ServiceCollection();
+            var assembly = new FakeAssembly(typeof(FirstDuplicateHandler<int>), typeof(SecondDuplicateHandler<int>));
+
+            Assert.Throws<RequestableException>(
+                () => services.AddRequestableServices(config => config.Assemblies = [assembly]));
+            Assert.Empty(services);
+        }
+
+        [Fact]
+        public void ShouldRegisterHandlersFromEveryAssembly_WhenNoneOfThemDuplicateAnother()
+        {
+            var services = new ServiceCollection();
+            var first = new FakeAssembly(typeof(FirstDuplicateHandler<int>));
+            var second = new FakeAssembly(typeof(PingRequestHandler));
+
+            services.AddRequestableServices(config => config.Assemblies = [first, second]);
+
+            AssertTransientHandler<IRequestHandler<DuplicateRequest<int>, string>, FirstDuplicateHandler<int>>(services);
+            AssertTransientHandler<IRequestHandler<PingRequest>, PingRequestHandler>(services);
+        }
+
+        [Fact]
+        public async Task ShouldAllowAHandlerRegisteredAfterwardsToReplaceAScannedHandler()
+        {
+            var services = new ServiceCollection();
+            services.AddRequestableServices();
+            services.AddTransient<IRequestHandler<EchoRequest, string>, ReplacementEchoRequestHandler<int>>();
+            await using var provider = services.BuildServiceProvider();
+
+            var actual = await provider.GetRequiredService<IMediator>()
+                .SendAsync(new EchoRequest("hello"), TestContext.Current.CancellationToken);
+
+            Assert.Equal("replaced", actual);
+        }
+
         private sealed class CustomMediator : IMediator
         {
             public Task SendAsync(IRequest request, CancellationToken cancellationToken) => Task.CompletedTask;
@@ -195,6 +230,108 @@ public static class DependencyInjectionTests
             public Task<TResponse> SendAsync<TResponse>(
                 IRequest<TResponse> request,
                 CancellationToken cancellationToken) => Task.FromResult(default(TResponse)!);
+        }
+    }
+
+    public class AddHandlers
+    {
+        [Fact]
+        public void ShouldThrowRequestableException_WhenTwoTypesHandleTheSameRequestWithAResponse()
+        {
+            var services = new ServiceCollection();
+            var first = typeof(FirstDuplicateHandler<int>);
+            var second = typeof(SecondDuplicateHandler<int>);
+
+            var exception = Assert.Throws<RequestableException>(() => services.AddHandlers([first, second]));
+
+            Assert.Equal(
+                "Unable to register request handlers: more than one handler found for " +
+                $"'DuplicateRequest`1' request ({first.FullName}, {second.FullName}).",
+                exception.Message);
+        }
+
+        [Fact]
+        public void ShouldThrowRequestableException_WhenTwoTypesHandleTheSameVoidRequest()
+        {
+            var services = new ServiceCollection();
+            var first = typeof(FirstDuplicateVoidHandler<int>);
+            var second = typeof(SecondDuplicateVoidHandler<int>);
+
+            var exception = Assert.Throws<RequestableException>(() => services.AddHandlers([first, second]));
+
+            Assert.Equal(
+                "Unable to register request handlers: more than one handler found for " +
+                $"'DuplicateVoidRequest`1' request ({first.FullName}, {second.FullName}).",
+                exception.Message);
+        }
+
+        [Fact]
+        public void ShouldReportEveryDuplicatedRequestInOneException()
+        {
+            var services = new ServiceCollection();
+            var duplicateTypes = new[]
+            {
+                typeof(FirstDuplicateVoidHandler<int>),
+                typeof(SecondDuplicateVoidHandler<int>),
+                typeof(FirstDuplicateHandler<int>),
+                typeof(SecondDuplicateHandler<int>)
+            };
+
+            var exception = Assert.Throws<RequestableException>(() => services.AddHandlers(duplicateTypes));
+
+            Assert.Equal(
+                "Unable to register request handlers: more than one handler found for " +
+                $"'DuplicateRequest`1' request ({typeof(FirstDuplicateHandler<int>).FullName}, " +
+                $"{typeof(SecondDuplicateHandler<int>).FullName}); " +
+                $"'DuplicateVoidRequest`1' request ({typeof(FirstDuplicateVoidHandler<int>).FullName}, " +
+                $"{typeof(SecondDuplicateVoidHandler<int>).FullName}).",
+                exception.Message);
+        }
+
+        [Fact]
+        public void ShouldDescribeDuplicatesTheSameWay_RegardlessOfTheOrderTypesAreFound()
+        {
+            var first = typeof(FirstDuplicateHandler<int>);
+            var second = typeof(SecondDuplicateHandler<int>);
+
+            var forwards = Assert.Throws<RequestableException>(
+                () => new ServiceCollection().AddHandlers([first, second]));
+            var backwards = Assert.Throws<RequestableException>(
+                () => new ServiceCollection().AddHandlers([second, first]));
+
+            Assert.Equal(forwards.Message, backwards.Message);
+        }
+
+        [Fact]
+        public void ShouldRegisterNothing_WhenDuplicatesAreFound()
+        {
+            var services = new ServiceCollection();
+
+            Assert.Throws<RequestableException>(() => services.AddHandlers(
+                [typeof(PingRequestHandler), typeof(FirstDuplicateHandler<int>), typeof(SecondDuplicateHandler<int>)]));
+
+            Assert.Empty(services);
+        }
+
+        [Fact]
+        public void ShouldRegisterTypeOnce_WhenItIsListedMoreThanOnce()
+        {
+            var services = new ServiceCollection();
+
+            services.AddHandlers([typeof(PingRequestHandler), typeof(PingRequestHandler)]);
+
+            AssertTransientHandler<IRequestHandler<PingRequest>, PingRequestHandler>(services);
+        }
+
+        [Fact]
+        public void ShouldNotTreatHandlersForDifferentResponsesAsDuplicates()
+        {
+            var services = new ServiceCollection();
+
+            services.AddHandlers([typeof(DualIntRequestHandler), typeof(DualStringRequestHandler)]);
+
+            AssertTransientHandler<IRequestHandler<DualRequest, int>, DualIntRequestHandler>(services);
+            AssertTransientHandler<IRequestHandler<DualRequest, string>, DualStringRequestHandler>(services);
         }
     }
 

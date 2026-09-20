@@ -13,14 +13,9 @@ public class RequestableConfiguration
     /// </summary>
     public IEnumerable<Assembly>? Assemblies { get; set; }
 
-    /// <summary>
-    /// The <see cref="IMediator"/> implementation to register.  Default is <see cref="Mediator"/>.  It must implement
-    /// <see cref="IMediator"/>.
-    /// </summary>
+    /// <summary>The <see cref="IMediator"/> implementation to register.  Default is <see cref="Mediator"/>.</summary>
     public Type MediatorImplementationType { get; set; } = typeof(Mediator);
 
-    /// <summary>
-    /// The service lifetime of the mediator service.  Default is <see cref="ServiceLifetime.Transient"/>.
-    /// </summary>
+    /// <summary>The service lifetime of the mediator service.  Default is <see cref="ServiceLifetime.Transient"/>.</summary>
     public ServiceLifetime MediatorServiceLifetime { get; set; } = ServiceLifetime.Transient;
 }

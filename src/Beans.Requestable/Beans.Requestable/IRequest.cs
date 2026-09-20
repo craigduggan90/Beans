@@ -1,6 +1,6 @@
 namespace Beans.Requestable;
 
-/// <summary>Marker interface for a request which has a void response.</summary>
+/// <summary>Marker interface for a request which does not return a value.</summary>
 public interface IRequest : IRequestBase;
 
 /// <summary>Marker interface for a request which returns <typeparamref name="TResponse"/>.</summary>

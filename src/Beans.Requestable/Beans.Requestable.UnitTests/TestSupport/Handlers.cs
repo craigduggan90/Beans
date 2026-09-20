@@ -73,3 +73,34 @@ internal sealed class ThrowingRequestHandler : IRequestHandler<ThrowingRequest, 
     public Task<string> HandleAsync(ThrowingRequest request, CancellationToken cancellationToken)
         => throw new InvalidOperationException("handler failed");
 }
+
+internal sealed class FirstDuplicateHandler<T> : IRequestHandler<DuplicateRequest<T>, string>
+{
+    public Task<string> HandleAsync(DuplicateRequest<T> request, CancellationToken cancellationToken)
+        => Task.FromResult("first");
+}
+
+internal sealed class SecondDuplicateHandler<T> : IRequestHandler<DuplicateRequest<T>, string>
+{
+    public Task<string> HandleAsync(DuplicateRequest<T> request, CancellationToken cancellationToken)
+        => Task.FromResult("second");
+}
+
+internal sealed class FirstDuplicateVoidHandler<T> : IRequestHandler<DuplicateVoidRequest<T>>
+{
+    public Task HandleAsync(DuplicateVoidRequest<T> request, CancellationToken cancellationToken)
+        => Task.CompletedTask;
+}
+
+internal sealed class SecondDuplicateVoidHandler<T> : IRequestHandler<DuplicateVoidRequest<T>>
+{
+    public Task HandleAsync(DuplicateVoidRequest<T> request, CancellationToken cancellationToken)
+        => Task.CompletedTask;
+}
+
+/// <summary>Stands in for a handler registered by hand to replace a scanned one.  Generic, so it is not scanned.</summary>
+internal sealed class ReplacementEchoRequestHandler<T> : IRequestHandler<EchoRequest, string>
+{
+    public Task<string> HandleAsync(EchoRequest request, CancellationToken cancellationToken)
+        => Task.FromResult("replaced");
+}

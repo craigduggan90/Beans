@@ -22,7 +22,7 @@ public class Mediator(IServiceProvider serviceProvider) : IMediator
         var wrapper = VoidWrappers.GetOrAdd(request.GetType(), static requestType =>
             Activator.CreateInstance(typeof(RequestHandlerWrapper<>).MakeGenericType(requestType))
                 as RequestHandlerWrapperBase
-            ?? throw RequestHandlerException.ForFailedInstantiation(requestType));
+            ?? throw RequestableException.ForFailedInstantiation(requestType));
 
         // The base type declares HandleAsync(IRequest, IServiceProvider, CancellationToken); the derived wrapper
         // implements it against the concrete request type.
@@ -37,7 +37,7 @@ public class Mediator(IServiceProvider serviceProvider) : IMediator
         var wrapper = ResponseWrappers<TResponse>.Instances.GetOrAdd(request.GetType(), static requestType =>
             Activator.CreateInstance(typeof(RequestHandlerWrapper<,>).MakeGenericType(requestType, typeof(TResponse)))
                 as RequestHandlerWrapperBase<TResponse>
-            ?? throw RequestHandlerException.ForFailedInstantiation(requestType));
+            ?? throw RequestableException.ForFailedInstantiation(requestType));
 
         return wrapper.HandleAsync(request, serviceProvider, cancellationToken);
     }

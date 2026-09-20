@@ -25,7 +25,7 @@ public sealed class MediatorEndpointTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task WhenRequestHasAResponse_ReturnsTheHandlerResponse()
+    public async Task ShouldReturnHandlerResponse_WhenRequestHasAResponse()
     {
         var response = await _client.GetAsync("/test/greet/Beans", TestContext.Current.CancellationToken);
 
@@ -34,7 +34,7 @@ public sealed class MediatorEndpointTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task WhenVoidRequestIsSent_InvokesTheHandler()
+    public async Task ShouldInvokeHandler_WhenVoidRequestIsSent()
     {
         var response = await _client.PostAsJsonAsync(
             "/test/log",
@@ -46,7 +46,7 @@ public sealed class MediatorEndpointTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task WhenHandlerNeedsAScopedService_ItSharesTheScopeOfTheRequest()
+    public async Task ShouldShareRequestScope_WhenHandlerNeedsAScopedService()
     {
         var result = await _client.GetFromJsonAsync<ScopeResult>(
             "/test/scope",
@@ -57,7 +57,7 @@ public sealed class MediatorEndpointTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task WhenSeparateRequestsAreMade_EachGetsItsOwnScope()
+    public async Task ShouldUseSeparateScopes_WhenSeparateRequestsAreMade()
     {
         var first = await _client.GetFromJsonAsync<ScopeResult>(
             "/test/scope",
@@ -72,16 +72,16 @@ public sealed class MediatorEndpointTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task WhenNoHandlerIsRegistered_ThrowsRequestHandlerException()
+    public async Task ShouldThrowRequestableException_WhenNoHandlerIsRegistered()
     {
-        var exception = await Assert.ThrowsAsync<RequestHandlerException>(
+        var exception = await Assert.ThrowsAsync<RequestableException>(
             () => _client.GetAsync("/test/unhandled", TestContext.Current.CancellationToken));
 
         Assert.Equal("Unable to resolve handler for 'UnhandledRequest' request.", exception.Message);
     }
 
     [Fact]
-    public async Task WhenHandlerThrows_TheExceptionPropagates()
+    public async Task ShouldPropagateException_WhenHandlerThrows()
     {
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             () => _client.GetAsync("/test/fail", TestContext.Current.CancellationToken));

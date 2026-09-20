@@ -14,7 +14,7 @@ internal sealed class RequestHandlerWrapper<TRequest> : RequestHandlerWrapperBas
         CancellationToken cancellationToken)
     {
         var handler = provider.GetService(typeof(IRequestHandler<TRequest>)) as IRequestHandler<TRequest>
-                      ?? throw RequestHandlerException.ForRequest(typeof(TRequest));
+                      ?? throw RequestableException.ForRequest(typeof(TRequest));
 
         await handler.HandleAsync((TRequest)request, cancellationToken).ConfigureAwait(false);
     }
@@ -34,7 +34,7 @@ internal sealed class RequestHandlerWrapper<TRequest, TResponse> : RequestHandle
     {
         var handler = provider.GetService(typeof(IRequestHandler<TRequest, TResponse>))
                           as IRequestHandler<TRequest, TResponse>
-                      ?? throw RequestHandlerException.ForRequest(typeof(TRequest));
+                      ?? throw RequestableException.ForRequest(typeof(TRequest));
 
         return await handler.HandleAsync((TRequest)request, cancellationToken).ConfigureAwait(false);
     }

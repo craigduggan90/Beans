@@ -12,21 +12,21 @@ public static class MediatorTests
         return new Mediator(services.BuildServiceProvider());
     }
 
-    public class SendAsyncWithoutResponse
+    public class SendAsync
     {
         [Fact]
-        public async Task ShouldThrowException_WhenHandlerNotRegistered()
+        public async Task ShouldThrowException_WhenHandlerNotRegistered_ForVoidRequest()
         {
             var sut = CreateSut();
 
-            var exception = await Assert.ThrowsAsync<RequestHandlerException>(
+            var exception = await Assert.ThrowsAsync<RequestableException>(
                 () => sut.SendAsync(new UnhandledVoidRequest(), TestContext.Current.CancellationToken));
 
             Assert.Equal("Unable to resolve handler for 'UnhandledVoidRequest' request.", exception.Message);
         }
 
         [Fact]
-        public async Task ShouldInvokeHandlerWithRequestAndCancellationToken_WhenHandlerRegistered()
+        public async Task ShouldInvokeHandlerWithRequestAndCancellationToken_WhenHandlerRegistered_ForVoidRequest()
         {
             var handler = new PingRequestHandler();
             var sut = CreateSut(s => s.AddSingleton<IRequestHandler<PingRequest>>(handler));
@@ -40,7 +40,7 @@ public static class MediatorTests
         }
 
         [Fact]
-        public async Task ShouldInvokeHandlerEveryTime_WhenSentRepeatedly()
+        public async Task ShouldInvokeHandlerEveryTime_WhenSentRepeatedly_ForVoidRequest()
         {
             var handler = new PingRequestHandler();
             var sut = CreateSut(s => s.AddSingleton<IRequestHandler<PingRequest>>(handler));
@@ -52,30 +52,27 @@ public static class MediatorTests
         }
 
         [Fact]
-        public async Task ShouldThrowArgumentNullException_WhenRequestIsNull()
+        public async Task ShouldThrowArgumentNullException_WhenRequestIsNull_ForVoidRequest()
         {
             var sut = CreateSut();
 
             await Assert.ThrowsAsync<ArgumentNullException>(
                 () => sut.SendAsync((IRequest)null!, TestContext.Current.CancellationToken));
         }
-    }
 
-    public class SendAsyncWithResponse
-    {
         [Fact]
-        public async Task ShouldThrowException_WhenHandlerNotRegistered()
+        public async Task ShouldThrowException_WhenHandlerNotRegistered_ForValueRequest()
         {
             var sut = CreateSut();
 
-            var exception = await Assert.ThrowsAsync<RequestHandlerException>(
+            var exception = await Assert.ThrowsAsync<RequestableException>(
                 () => sut.SendAsync(new UnhandledRequest(), TestContext.Current.CancellationToken));
 
             Assert.Equal("Unable to resolve handler for 'UnhandledRequest' request.", exception.Message);
         }
 
         [Fact]
-        public async Task ShouldReturnHandlerResponse_WhenHandlerRegistered()
+        public async Task ShouldReturnHandlerResponse_WhenHandlerRegistered_ForValueRequest()
         {
             var sut = CreateSut(s => s.AddTransient<IRequestHandler<EchoRequest, string>, EchoRequestHandler>());
 
@@ -85,7 +82,7 @@ public static class MediatorTests
         }
 
         [Fact]
-        public async Task ShouldPassCancellationTokenToHandler()
+        public async Task ShouldPassCancellationTokenToHandler_ForValueRequest()
         {
             var handler = new EchoRequestHandler();
             var sut = CreateSut(s => s.AddSingleton<IRequestHandler<EchoRequest, string>>(handler));
@@ -97,7 +94,7 @@ public static class MediatorTests
         }
 
         [Fact]
-        public async Task ShouldPropagateException_WhenHandlerThrows()
+        public async Task ShouldPropagateException_WhenHandlerThrows_ForValueRequest()
         {
             var sut = CreateSut(
                 s => s.AddTransient<IRequestHandler<ThrowingRequest, string>, ThrowingRequestHandler>());
@@ -109,7 +106,7 @@ public static class MediatorTests
         }
 
         [Fact]
-        public async Task ShouldResolveHandlerPerSend_WhenSentRepeatedly()
+        public async Task ShouldResolveHandlerPerSend_WhenSentRepeatedly_ForValueRequest()
         {
             var sut = CreateSut(s => s.AddTransient<IRequestHandler<EchoRequest, string>, EchoRequestHandler>());
 
@@ -136,7 +133,7 @@ public static class MediatorTests
         }
 
         [Fact]
-        public async Task ShouldThrowArgumentNullException_WhenRequestIsNull()
+        public async Task ShouldThrowArgumentNullException_WhenRequestIsNull_ForValueRequest()
         {
             var sut = CreateSut();
 
