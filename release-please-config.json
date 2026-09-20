@@ -27,6 +27,17 @@
           "xpath": "//Project/PropertyGroup/Version"
         }
       ]
+    },
+    "src/Beans.Requestable": {
+      "component": "Beans.Requestable",
+      "pull-request-title-pattern": "chore(release): release requestable ${version}",
+      "extra-files": [
+        {
+          "type": "xml",
+          "path": "Beans.Requestable/Beans.Requestable.csproj",
+          "xpath": "//Project/PropertyGroup/Version"
+        }
+      ]
     }
   }
 }

@@ -19,6 +19,7 @@ jobs:
         project:
           - Beans.Patchable
           - Beans.Common
+          - Beans.Requestable
 
     steps:
       - name: 📩 checkout
