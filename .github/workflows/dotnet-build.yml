@@ -20,6 +20,7 @@ jobs:
           - Beans.Patchable
           - Beans.Common
           - Beans.Requestable
+          - Beans.Pageable
 
     steps:
       - name: 📩 checkout

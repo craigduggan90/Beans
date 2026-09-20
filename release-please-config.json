@@ -38,6 +38,17 @@
           "xpath": "//Project/PropertyGroup/Version"
         }
       ]
+    },
+    "src/Beans.Pageable": {
+      "component": "Beans.Pageable",
+      "pull-request-title-pattern": "chore(release): release pageable ${version}",
+      "extra-files": [
+        {
+          "type": "xml",
+          "path": "Beans.Pageable/Beans.Pageable.csproj",
+          "xpath": "//Project/PropertyGroup/Version"
+        }
+      ]
     }
   }
 }
