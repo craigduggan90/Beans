@@ -46,6 +46,7 @@ jobs:
 
     permissions:
       contents: write
+      id-token: write
 
     strategy:
       fail-fast: false
@@ -77,9 +78,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: gh release upload "$TAG" artifacts/*.nupkg --clobber
 
-      # flip the NUGET_PUBLISH_ENABLED repo variable to 'true' (and add NUGET_API_KEY) to start publishing
+      - name: 🔑 nuget login
+        id: nuget-login
+        if: vars.NUGET_PUBLISH_ENABLED == 'true'
+        uses: NuGet/login@v1
+        with:
+          user: BillYinzen
+
       - name: 🚀 push to nuget
         if: vars.NUGET_PUBLISH_ENABLED == 'true'
         env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
         run: dotnet nuget push "artifacts/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
