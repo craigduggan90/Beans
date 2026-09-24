@@ -49,6 +49,17 @@
           "xpath": "//Project/PropertyGroup/Version"
         }
       ]
+    },
+    "src/Beans.Cacheable": {
+      "component": "Beans.Cacheable",
+      "pull-request-title-pattern": "chore(release): release cacheable ${version}",
+      "extra-files": [
+        {
+          "type": "xml",
+          "path": "Beans.Cacheable/Beans.Cacheable.csproj",
+          "xpath": "//Project/PropertyGroup/Version"
+        }
+      ]
     }
   }
 }
