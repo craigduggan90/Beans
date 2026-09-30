@@ -35,8 +35,6 @@ public sealed class Product : PatchableEntity
         UpdateProperty(nameof(Price), price);
     }
 }
-
-
 ```
 
 Both Minimal API's and Controller-Based API's need `OptionalJsonConverterFactory` registered on the 
