@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - main
+  # manually (re)publish an existing release tag to nuget
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: release tag to publish to nuget (e.g. Beans.Pageable-v1.0.0)
+        required: true
+        type: string
 
 # one release run at a time, and never cancel one part-way through
 concurrency:
@@ -16,6 +23,7 @@ permissions:
 jobs:
   release-please:
     name: release please
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
 
     permissions:
@@ -87,6 +95,51 @@ jobs:
 
       - name: 🚀 push to nuget
         if: vars.NUGET_PUBLISH_ENABLED == 'true'
+        env:
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
+        run: dotnet nuget push "artifacts/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
+
+  # for releases that were tagged without being pushed to nuget, or whose publish failed
+  republish:
+    name: republish (${{ inputs.tag }})
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    env:
+      TAG: ${{ inputs.tag }}
+
+    steps:
+      - name: 📩 checkout
+        uses: actions/checkout@v7
+        with:
+          ref: refs/tags/${{ env.TAG }}
+
+      - name: ⚙️ setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      # tags look like Beans.Pageable-v1.0.0, and the project lives in src/Beans.Pageable
+      - name: 📦 pack
+        run: |
+          project="${TAG%-v*}"
+          if [ ! -f "src/$project/$project.sln" ]; then
+            echo "::error::tag '$TAG' does not map to a project under src/"
+            exit 1
+          fi
+          dotnet pack "src/$project/$project.sln" --configuration Release --output artifacts
+
+      - name: 🔑 nuget login
+        id: nuget-login
+        uses: NuGet/login@v1
+        with:
+          user: BillYinzen
+
+      - name: 🚀 push to nuget
         env:
           NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
         run: dotnet nuget push "artifacts/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
