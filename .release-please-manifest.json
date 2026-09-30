@@ -2,5 +2,6 @@
   "src/Beans.Patchable": "1.0.0",
   "src/Beans.Common": "1.0.0",
   "src/Beans.Requestable": "1.0.0",
-  "src/Beans.Pageable": "1.0.0"
+  "src/Beans.Pageable": "1.0.0",
+  "src/Beans.Cacheable": "0.0.0"
 }
