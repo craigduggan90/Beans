@@ -17,8 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Project reference for now: switch to a package reference once Beans.Common has releases. -->
-    <ProjectReference Include="..\..\Beans.Common\Beans.Common\Beans.Common.csproj"/>
+    <PackageReference Include="Beans.Common" Version="1.0.0"/>
   </ItemGroup>
 
 </Project>
