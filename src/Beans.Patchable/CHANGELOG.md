@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.2](https://github.com/craigduggan90/Beans/compare/Beans.Patchable-v1.0.1...Beans.Patchable-v1.0.2) (2026-11-17)
+
+
+### Bug Fixes
+
+* **patchable:** call virtual setdirty when patching ([9f2100e](https://github.com/craigduggan90/Beans/commit/9f2100ef3bd40ef986be205def3cbbb35bc7a166))
+* **patchable:** call virtual setdirty when patching ([#20](https://github.com/craigduggan90/Beans/issues/20)) ([006bc90](https://github.com/craigduggan90/Beans/commit/006bc90e00c6a4ffd0f052cc4524ef5be99dbabf))
+
 ## [1.0.1](https://github.com/craigduggan90/Beans/compare/Beans.Patchable-v1.0.0...Beans.Patchable-v1.0.1) (2026-09-30)
 
 
