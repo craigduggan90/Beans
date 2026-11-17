@@ -106,7 +106,7 @@ public abstract class PatchableEntity : IPatchableEntity
             return false;
 
         property.SetValue(this, null);
-        IsDirty = true;
+        SetDirty();
 
         return true;
     }
@@ -125,7 +125,7 @@ public abstract class PatchableEntity : IPatchableEntity
             return false;
 
         property.SetValue(this, value);
-        IsDirty = true;
+        SetDirty();
 
         return true;
     }
