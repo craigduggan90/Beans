@@ -246,6 +246,55 @@ public static class PatchableEntityTests
         }
     }
 
+    public class UpdatePropertyWithSetDirtyOverride
+    {
+        [Fact]
+        public void ShouldCallSetDirty_WhenValueIsChanged()
+        {
+            var entity = new TrackingEntity();
+
+            entity.UpdateProperty("Name", Optional<string>.Of("Bob"));
+
+            Assert.Equal(1, entity.SetDirtyCalls);
+        }
+
+        [Fact]
+        public void ShouldCallSetDirty_WhenPropertyIsSetToNull()
+        {
+            var entity = new TrackingEntity();
+
+            entity.UpdateProperty("Description", Optional<string?>.Of(null));
+
+            Assert.Equal(1, entity.SetDirtyCalls);
+        }
+
+        [Fact]
+        public void ShouldNotCallSetDirty_WhenNothingChanges()
+        {
+            var entity = new TrackingEntity();
+
+            entity.UpdateProperty("Name", Optional<string>.Of("Alice"));
+            entity.UpdateProperty("Name", Optional<string>.Unset);
+
+            Assert.Equal(0, entity.SetDirtyCalls);
+        }
+    }
+
+    private sealed class TrackingEntity : PatchableEntity
+    {
+        public string Name { get; set; } = "Alice";
+
+        public string? Description { get; set; } = "Description";
+
+        public int SetDirtyCalls { get; private set; }
+
+        public override void SetDirty()
+        {
+            SetDirtyCalls++;
+            base.SetDirty();
+        }
+    }
+
     private sealed class TestEntity : PatchableEntity
     {
         public string Name { get; set; } = "Alice";
